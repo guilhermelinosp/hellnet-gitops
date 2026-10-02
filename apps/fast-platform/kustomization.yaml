@@ -8,7 +8,7 @@ labels:
     includeSelectors: true
 images:
   - name: ghcr.io/guilhermelinosp/fast-platform
-    newTag: v1.11.0
+    newTag: v1.10.7
 configMapGenerator:
   - name: fast-platform
     literals:
