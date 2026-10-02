@@ -1,3 +1,4 @@
+# Servico Socket.IO (fast-sockets): consome os eventos do Kafka e os entrega por WebSocket.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: fast
