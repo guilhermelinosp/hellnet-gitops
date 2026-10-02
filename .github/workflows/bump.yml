@@ -9,11 +9,12 @@ on:
       base:
         description: Branch base dos PRs (use outra so para testar)
         default: main
+      branch_prefix:
+        description: Prefixo das branches (use outro so para testar)
+        default: bump
 
 permissions:
-  actions: write
-  contents: write
-  pull-requests: write
+  contents: read
 
 concurrency:
   group: bump
@@ -27,10 +28,23 @@ jobs:
         with:
           ref: ${{ inputs.base || 'main' }}
           fetch-depth: 0
+          persist-credentials: false
+      # token do app (nao o GITHUB_TOKEN): so assim o pull_request do PR dispara o pr-gate
+      - name: Create GitHub App installation token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.HELLNET_ACTIONS_CLIENT_ID }}
+          private-key: ${{ secrets.HELLNET_ACTIONS_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+          permission-contents: write
+          permission-pull-requests: write
       - name: Open the bump pull requests
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
           BASE: ${{ inputs.base || 'main' }}
+          BRANCH_PREFIX: ${{ inputs.branch_prefix || 'bump' }}
         run: |
           git config user.name "hellnet-gitops"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

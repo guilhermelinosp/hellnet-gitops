@@ -4,7 +4,6 @@ on:
   pull_request:
   push:
     branches: [main]
-  workflow_dispatch:   # o bump dispara na branch do PR (o GITHUB_TOKEN nao dispara pull_request)
 
 permissions:
   contents: read

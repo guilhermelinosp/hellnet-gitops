@@ -7,6 +7,7 @@ set -euo pipefail
 OWNER=${OWNER:-guilhermelinosp}
 DRY_RUN=${DRY_RUN:-0}
 BASE=${BASE:-main}
+PREFIX=${BRANCH_PREFIX:-bump}   # so muda em teste
 
 # A imagem existe no GHCR? (consulta anonima ao registry; as imagens sao publicas)
 image_exists() {
@@ -29,7 +30,7 @@ for dir in apps/*/; do
   if ! image_exists "$svc" "$latest"; then
     echo "[$svc] release $latest ainda sem imagem no GHCR: tento na proxima execucao"; continue
   fi
-  branch="bump/$svc-$latest"
+  branch="$PREFIX/$svc-$latest"
   if [ -n "$(gh pr list --head "$branch" --state all --json number --jq '.[0].number' 2>/dev/null)" ]; then
     echo "[$svc] ja existe PR para $latest"; continue
   fi
@@ -39,13 +40,11 @@ for dir in apps/*/; do
   sed -i.bak "s|newTag: $current|newTag: $latest|" "$file" && rm -f "$file.bak"
   git add "$file"
   git commit -q -m "chore($svc): bump the image to $latest"
-  git push -q -u origin "$branch"
+  git push -q -u "https://x-access-token:${GH_TOKEN}@github.com/$OWNER/hellnet-gitops.git" "$branch"
   gh pr create --base "$BASE" --head "$branch" \
     --title "chore($svc): bump the image to $latest" \
     --body "Atualiza \`ghcr.io/$OWNER/$svc\` de \`$current\` para \`$latest\` (release: https://github.com/$OWNER/$svc/releases/tag/$latest).
 
 Depois do merge, sincronize no Argo CD: \`argocd app sync $svc\`."
-  # o GITHUB_TOKEN nao dispara o pull_request: roda a validacao na branch (o check aparece no PR)
-  gh workflow run validate.yml --ref "$branch" >/dev/null 2>&1 || echo "[$svc] aviso: nao consegui disparar o validate"
   git switch -q "$BASE"
 done
