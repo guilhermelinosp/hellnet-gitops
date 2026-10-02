@@ -7,16 +7,20 @@ imagem no GHCR; **nenhum manifesto de deploy vive neles**.
 ## Estrutura
 
 ```text
-apps/<serviço>/        kustomization.yaml, deployment.yaml, service.yaml, httproute.yaml
+apps/<serviço>/        kustomization.yaml, deployment.yaml (e service.yaml quando o serviço recebe tráfego)
 components/hardened/   baseline de segurança aplicado a todo Deployment (Pod Security restricted)
 bootstrap/             ApplicationSet que cria uma Application por pasta de apps/
 ```
 
-| Serviço | Imagem | Exposição |
+| Serviço | Imagem | Acesso |
 |---|---|---|
-| `fast-platform` | `ghcr.io/guilhermelinosp/fast-platform` | `fast.hellnet.com.br` |
+| `fast-platform` | `ghcr.io/guilhermelinosp/fast-platform` | `port-forward` (`localhost:18080`) |
 | `fast-listeners` | `ghcr.io/guilhermelinosp/fast-listeners` | nenhuma (publica o outbox no Kafka) |
-| `fast-sockets` | `ghcr.io/guilhermelinosp/fast-sockets` | `fast-sockets.hellnet.com.br` |
+| `fast-sockets` | `ghcr.io/guilhermelinosp/fast-sockets` | `port-forward` (`localhost:18081`) |
+
+Os serviços **não têm `HTTPRoute`**: nada fica exposto no Gateway. Por enquanto o acesso é por `kubectl
+port-forward` (`make forward` em `~/.talos/cluster` abre `localhost:18080` e `localhost:18081`). Um gateway proxy
+próprio entra depois, e é nele que as rotas voltam.
 
 ## Atualizar a versão de um serviço
 
