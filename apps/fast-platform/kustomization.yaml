@@ -1,0 +1,29 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: fast
+resources: [deployment.yaml, service.yaml, httproute.yaml]
+components: [../../components/hardened]
+labels:
+  - pairs: {app.kubernetes.io/name: hellnet-service, app.kubernetes.io/instance: fast-platform}
+    includeSelectors: true
+images:
+  - name: ghcr.io/guilhermelinosp/fast-platform
+    newTag: v1.11.0
+configMapGenerator:
+  - name: fast-platform
+    literals:
+      - HELLNET_ENVIRONMENT=Development
+      - HELLNET_PORT=8080
+      - HELLNET_TELEMETRY_ENDPOINT=http://alloy.observability.svc.cluster.local:4318
+      - DATABASE_HOST=postgres.tools.svc.cluster.local
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=fast
+      - DATABASE_POOL_MAX_SIZE=10
+      # listener interno do Redpanda (o externo anuncia 127.0.0.1:9092 e so serve o Mac)
+      - KAFKA_BROKERS=redpanda.tools.svc.cluster.local:9093
+      - KAFKA_SECURITY_PROTOCOL=plaintext
+      - KAFKA_TOPIC_ORDER_REQUESTED=br.com.hellnet.fast.order.requested.v1
+      - KAFKA_TOPIC_ORDER_ACCEPTED=br.com.hellnet.fast.order.accepted.v1
+      - CACHE_CONNECTION=redis.tools.svc.cluster.local:6379
+      - CACHE_ENABLE_L2=true
+      - CACHE_DEFAULT_TTL=5m

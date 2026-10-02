@@ -1,0 +1,36 @@
+# Aplicado uma unica vez (kubectl apply -f bootstrap/applicationset.yaml): cria uma Application por pasta de apps/.
+# Servico novo = pasta nova em apps/ com um kustomization.yaml. Sincronizacao MANUAL (sem `automated`):
+# nada muda no cluster ate voce rodar `argocd app sync <nome>`.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: apps
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/guilhermelinosp/hellnet-gitops
+        revision: main
+        directories:
+          - path: apps/*
+  template:
+    metadata:
+      name: '{{.path.basename}}'
+      annotations:
+        link.argocd.argoproj.io/GitHub: 'https://github.com/guilhermelinosp/{{.path.basename}}'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/guilhermelinosp/hellnet-gitops
+        targetRevision: main
+        path: '{{.path.path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: fast
+      syncPolicy:
+        syncOptions: [CreateNamespace=true]
+        managedNamespaceMetadata:
+          labels:
+            pod-security.kubernetes.io/enforce: restricted

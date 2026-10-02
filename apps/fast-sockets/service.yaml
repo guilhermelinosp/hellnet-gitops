@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: fast-sockets
+spec:
+  ports:
+    - {name: http, port: 80, targetPort: http}

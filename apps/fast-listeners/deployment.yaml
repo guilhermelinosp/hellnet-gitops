@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fast-listeners
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate   # um unico publicador do outbox por vez
+  template:
+    spec:
+      containers:
+        - name: fast-listeners
+          image: ghcr.io/guilhermelinosp/fast-listeners
+          envFrom:
+            - configMapRef: {name: fast-listeners}
+          env:
+            - {name: HELLNET_SERVICE, value: fast-listeners}
+            - name: DATABASE_USERNAME
+              valueFrom: {secretKeyRef: {name: fast-database, key: DATABASE_USERNAME}}
+            - name: DATABASE_PASSWORD
+              valueFrom: {secretKeyRef: {name: fast-database, key: DATABASE_PASSWORD}}
+          resources:
+            requests: {cpu: 20m, memory: 48Mi}
+            limits: {cpu: "1", memory: 512Mi}

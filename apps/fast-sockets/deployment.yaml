@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fast-sockets
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: fast-sockets
+          image: ghcr.io/guilhermelinosp/fast-sockets
+          envFrom:
+            - configMapRef: {name: fast-sockets}
+          env:
+            - {name: HELLNET_SERVICE, value: fast-sockets}
+          ports:
+            - {name: http, containerPort: 8080}
+          readinessProbe:
+            httpGet: {path: /ready, port: http}
+            periodSeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            httpGet: {path: /live, port: http}
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            requests: {cpu: 20m, memory: 48Mi}
+            limits: {cpu: "1", memory: 512Mi}

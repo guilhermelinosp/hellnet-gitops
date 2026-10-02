@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fast-platform
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: fast-platform
+          image: ghcr.io/guilhermelinosp/fast-platform
+          envFrom:
+            - configMapRef: {name: fast-platform}
+          env:
+            - {name: HELLNET_SERVICE, value: fast-platform}
+            - name: DATABASE_USERNAME
+              valueFrom: {secretKeyRef: {name: fast-database, key: DATABASE_USERNAME}}
+            - name: DATABASE_PASSWORD
+              valueFrom: {secretKeyRef: {name: fast-database, key: DATABASE_PASSWORD}}
+          ports:
+            - {name: http, containerPort: 8080}
+          readinessProbe:
+            httpGet: {path: /ready, port: http}
+            periodSeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            httpGet: {path: /live, port: http}
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            requests: {cpu: 20m, memory: 48Mi}
+            limits: {cpu: "1", memory: 512Mi}
