@@ -45,5 +45,7 @@ for dir in apps/*/; do
     --body "Atualiza \`ghcr.io/$OWNER/$svc\` de \`$current\` para \`$latest\` (release: https://github.com/$OWNER/$svc/releases/tag/$latest).
 
 Depois do merge, sincronize no Argo CD: \`argocd app sync $svc\`."
+  # o GITHUB_TOKEN nao dispara o pull_request: roda a validacao na branch (o check aparece no PR)
+  gh workflow run validate.yml --ref "$branch" >/dev/null 2>&1 || echo "[$svc] aviso: nao consegui disparar o validate"
   git switch -q "$BASE"
 done
