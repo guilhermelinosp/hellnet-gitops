@@ -1,0 +1,35 @@
+name: bump
+
+# Abre um PR de atualizacao de imagem quando um servico publica um release novo.
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+    inputs:
+      base:
+        description: Branch base dos PRs (use outra so para testar)
+        default: main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: bump
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+      - name: Open the bump pull requests
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE: ${{ inputs.base || 'main' }}
+        run: |
+          git config user.name "hellnet-gitops"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          scripts/bump.sh
