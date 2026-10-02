@@ -41,10 +41,18 @@ for dir in apps/*/; do
   git add "$file"
   git commit -q -m "chore($svc): bump the image to $latest"
   git push -q -u "https://x-access-token:${GH_TOKEN}@github.com/$OWNER/hellnet-gitops.git" "$branch"
-  gh pr create --base "$BASE" --head "$branch" \
+  url=$(gh pr create --base "$BASE" --head "$branch" \
     --title "chore($svc): bump the image to $latest" \
     --body "Atualiza \`ghcr.io/$OWNER/$svc\` de \`$current\` para \`$latest\` (release: https://github.com/$OWNER/$svc/releases/tag/$latest).
 
-Depois do merge, sincronize no Argo CD: \`argocd app sync $svc\`."
+Depois do merge, sincronize no Argo CD: \`argocd app sync $svc\`.")
+  echo "[$svc] $url"
+  # um bump novo substitui os anteriores ainda abertos do mesmo servico
+  new_number="${url##*/}"
+  for old in $(gh pr list --state open --base "$BASE" --json number,headRefName \
+      --jq ".[]|select(.headRefName|startswith(\"$PREFIX/$svc-\"))|select(.headRefName!=\"$branch\")|.number"); do
+    gh pr close "$old" --comment "Superseded by #$new_number ($svc $latest)." >/dev/null || true
+    echo "[$svc] fechado o PR antigo #$old"
+  done
   git switch -q "$BASE"
 done
