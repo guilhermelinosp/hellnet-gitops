@@ -24,7 +24,7 @@ jobs:
   bump:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.base || 'main' }}
           fetch-depth: 0
@@ -32,7 +32,7 @@ jobs:
       # token do app (nao o GITHUB_TOKEN): so assim o pull_request do PR dispara o pr-gate
       - name: Create GitHub App installation token
         id: app-token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        uses: actions/create-github-app-token@v3
         with:
           client-id: ${{ vars.HELLNET_ACTIONS_CLIENT_ID }}
           private-key: ${{ secrets.HELLNET_ACTIONS_PRIVATE_KEY }}
