@@ -9,7 +9,7 @@ labels:
     includeSelectors: true
 images:
   - name: ghcr.io/guilhermelinosp/fast-sockets
-    newTag: v1.1.2
+    newTag: v1.1.4
 configMapGenerator:
   - name: fast-sockets
     literals:
