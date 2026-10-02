@@ -20,6 +20,11 @@ spec:
       name: '{{.path.basename}}'
       annotations:
         link.argocd.argoproj.io/GitHub: 'https://github.com/guilhermelinosp/{{.path.basename}}'
+        # commit status no GitHub (ver ~/.talos/cluster/argocd/notifications.yaml)
+        notifications.argoproj.io/subscribe.on-sync-running.github: ""
+        notifications.argoproj.io/subscribe.on-deployed.github: ""
+        notifications.argoproj.io/subscribe.on-sync-failed.github: ""
+        notifications.argoproj.io/subscribe.on-health-degraded.github: ""
     spec:
       project: default
       source:
