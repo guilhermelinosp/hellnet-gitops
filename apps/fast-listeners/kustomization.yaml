@@ -8,7 +8,7 @@ labels:
     includeSelectors: true
 images:
   - name: ghcr.io/guilhermelinosp/fast-listeners
-    newTag: v1.1.0
+    newTag: v1.2.0
 configMapGenerator:
   - name: fast-listeners
     literals:
